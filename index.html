@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反射神経測定ゲーム</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            background-image: url(texture_00010.jpg);
+            background-size: cover;
+        }
+
+        .game-title {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        .description {
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        #game-screen {
+            width: 300px;
+            height: 300px;
+            background-color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 15px;
+        }
+
+        #start-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2 class="game-title">反射神経測定ゲーム</h2>
+    <p class="description">スタートを押すと画面が赤に変わります。緑に変わったら画面をクリックしてください。<br>
+        300ms以下を目指してみましょう!</p>
+    <div id="game-screen">ボタンを押してスタート</div>
+    <button id="start-btn">スタート</button>
+    <p id="result">結果： -- ms</p>
+    <script>
+        const screen = document.getElementById('game-screen');
+        const startBtn = document.getElementById('start-btn');
+        const result = document.getElementById('result');
+
+        let state = 'init';
+        let startTime = 0;
+        let timeoutId = null;
+
+        startBtn.addEventListener('click', () => {
+            if (state === 'init' || state === 'result') {
+                state = 'waiting';
+                startBtn.disabled = true;
+                screen.style.backgroundColor = '#ff0000';
+                screen.textContent = '緑になったら画面をクリック';
+
+                const delay = 1000 + Math.random() * 4000;
+                timeoutId = setTimeout(() => {
+                    state = 'ready';
+                    screen.style.backgroundColor = '#008000';
+                    screen.textContent = 'クリック！';
+                    startTime = performance.now();
+                }, delay);
+            }
+        });
+
+        screen.addEventListener('click', () => {
+            if (state === 'waiting') {
+                clearTimeout(timeoutId);
+                state = 'result';
+                startBtn.disabled = false;
+                startBtn.textContent = '再挑戦';
+                screen.style.backgroundColor = '#ff0000';
+                screen.textContent = 'フライング';
+                result.textContent = '結果： 早すぎます';
+
+            } else if (state === 'ready') {
+                const endTime = performance.now();
+                const diff = Math.round(endTime - startTime);
+                state = 'result';
+                startBtn.disabled = false;
+                startBtn.textContent = 'もう一度挑戦';
+                screen.style.backgroundColor = '#3498db';
+                screen.textContent = '終了';
+                result.textContent = `結果： ${diff} ms`;
+            }
+        });
+    </script>
+</body>
+</html>
